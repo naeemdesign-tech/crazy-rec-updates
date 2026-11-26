@@ -1,0 +1,29 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CRAZY REC أكواد</title>
+<style>body{font-family:system-ui,sans-serif;background:#0b1a2b;color:#e8f1f8;margin:0;padding:16px;max-width:560px;margin:auto}
+h1{font-size:20px}input,select,button{width:100%;box-sizing:border-box;font-size:16px;padding:12px;margin:6px 0;border-radius:10px;border:1px solid #2c4560;background:#122a42;color:#fff}
+button{background:#7be04a;color:#0b1a2b;font-weight:700;border:0}button.red{background:#ff6b6b}button.gray{background:#2c4560;color:#fff}
+.card{background:#122a42;border-radius:12px;padding:12px;margin:10px 0}.code{font-size:22px;letter-spacing:1px;direction:ltr;text-align:center;background:#0b1a2b;border-radius:8px;padding:12px;margin:8px 0;user-select:all}
+small{color:#9fb6cb}.err{color:#ff8a8a}.row{display:flex;gap:8px}.row>*{flex:1}</style></head><body>
+<h1>CRAZY REC · إدارة الأكواد</h1>
+<div id="login"><input id="pw" type="password" placeholder="كلمة سر الإدارة" autocomplete="current-password"><button onclick="enter()">دخول</button><div id="lerr" class="err"></div></div>
+<div id="app" style="display:none">
+<div class="card"><b>كود جديد</b>
+<input id="nm" placeholder="اسم العميل"><input id="ph" placeholder="رقم الموبايل (اختياري)" inputmode="tel">
+<select id="kind" onchange="document.getElementById('dd').style.display=this.value=='life'?'none':'block'"><option value="days">مدة بالأيام</option><option value="life">مدى الحياة</option></select>
+<input id="dd" type="number" min="1" max="3650" value="30" placeholder="عدد الأيام">
+<button onclick="mk()">إنشاء الكود</button><div id="out"></div></div>
+<div class="row"><button class="gray" onclick="load()">تحديث القائمة</button></div><div id="list"></div></div>
+<script>
+const U="https://ilgrodwikjbyuvbzpmcq.supabase.co/rest/v1/rpc/",K="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsZ3JvZHdpa2pieXV2YnpwbWNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU2NDg5MTgsImV4cCI6MjExMTIyNDkxOH0.t2dTYphdFv9X6JcgUsD35gHboZOw5hp0AaEU2tAq8dY";let PW="";
+async function rpc(f,b){const r=await fetch(U+f,{method:"POST",headers:{apikey:K,Authorization:"Bearer "+K,"Content-Type":"application/json"},body:JSON.stringify(b)});return r.json()}
+function esc(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+async function enter(){PW=document.getElementById("pw").value;const r=await rpc("act_admin_list",{p_pw:PW});if(!r.ok){document.getElementById("lerr").textContent="كلمة السر غلط أو محاولات كتير";return}
+document.getElementById("login").style.display="none";document.getElementById("app").style.display="block";draw(r.rows)}
+async function load(){const r=await rpc("act_admin_list",{p_pw:PW});if(r.ok)draw(r.rows)}
+function fd(d){return d?new Date(d).toLocaleDateString("ar-EG"):"-"}
+function draw(rows){document.getElementById("list").innerHTML=rows.map(x=>'<div class="card"><b>'+esc(x.name)+'</b> <small>'+esc(x.phone||"")+'</small><br><small>'+(x.lifetime?"مدى الحياة":x.days+" يوم")+' · '+({issued:"لم يُفعَّل",active:"مفعّل",revoked:"ملغي"}[x.status]||x.status)+'</small><br><small>تفعيل: '+fd(x.activated_at)+' · ينتهي: '+(x.lifetime?"أبدًا":fd(x.expires_at))+' · آخر تحقق: '+fd(x.last_check_at)+'</small>'+(x.status!="revoked"?'<button class="red" onclick="rv(\''+x.id+'\')">إلغاء الكود</button>':'')+'</div>').join("")||"<small>مفيش أكواد لسه</small>"}
+async function mk(){const life=document.getElementById("kind").value=="life";const r=await rpc("act_admin_create",{p_pw:PW,p_name:document.getElementById("nm").value,p_phone:document.getElementById("ph").value,p_days:life?null:parseInt(document.getElementById("dd").value),p_lifetime:life});const o=document.getElementById("out");
+if(!r.ok){o.innerHTML='<div class="err">'+esc({name_required:"اكتب اسم العميل",bad_days:"عدد الأيام غلط",denied:"مرفوض"}[r.error]||r.error)+'</div>';return}
+o.innerHTML='<small>الكود يظهر هنا مرة واحدة بس. انسخه وابعته للعميل:</small><div class="code">'+esc(r.code)+'</div><button class="gray" onclick="navigator.clipboard.writeText(\''+esc(r.code)+'\')">نسخ</button>';document.getElementById("nm").value="";document.getElementById("ph").value="";load()}
+async function rv(id){if(!confirm("تلغي الكود ده؟"))return;await rpc("act_admin_revoke",{p_pw:PW,p_id:id});load()}
+</script></body></html>
