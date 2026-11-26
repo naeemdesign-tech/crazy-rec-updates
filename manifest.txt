@@ -1,4 +1,12 @@
 versionName=2.5.1
-versionCode=20620
-apkSha256=67677b7b3f7ec2fb0a22b2c807d8afc5af513dcf2720a9a2ede1e2f7bf95a43b
-apkSize=70740800
+versionCode=20627
+apkSha256=cbe4d717224a2d9226adee6fca333fc414838b6869ef44527731bcc8713c095e
+apkSize=70641232
+patch.20625.url=https://github.com/naeemdesign-tech/crazy-rec-updates/releases/download/source-20627/20625-to-20627.crp
+patch.20625.baseSha256=5c4eec1ed57c40f5025f843f399e037b29f20eb33e724fb5278915adbb8f2295
+patch.20625.sha256=dfd2cf900464769b4ae5716353629c0cc31ed7f41c92731dc06c2b09157f160f
+patch.20625.size=1965517
+patch.20626.url=https://github.com/naeemdesign-tech/crazy-rec-updates/releases/download/source-20627/20626-to-20627.crp
+patch.20626.baseSha256=6daf7f1681f98d68e4cfb3b0822787f65617cfd3e857e869413bce1c205256d7
+patch.20626.sha256=26d988fcf401255bb113b42640e32b697052dc51a2e5b455b40738cd91bbc0ca
+patch.20626.size=367033
