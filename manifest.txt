@@ -1,0 +1,4 @@
+versionName=2.5.1
+versionCode=20620
+apkSha256=67677b7b3f7ec2fb0a22b2c807d8afc5af513dcf2720a9a2ede1e2f7bf95a43b
+apkSize=70740800
