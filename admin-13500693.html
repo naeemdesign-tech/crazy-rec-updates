@@ -7,6 +7,8 @@ small{color:#9fb6cb}.err{color:#ff8a8a}.row{display:flex;gap:8px}.row>*{flex:1}<
 <h1>CRAZY REC · إدارة الأكواد</h1>
 <div id="login"><input id="pw" type="password" placeholder="كلمة سر الإدارة" autocomplete="current-password"><button onclick="enter()">دخول</button><div id="lerr" class="err"></div></div>
 <div id="app" style="display:none">
+<div class="card"><b>كود التجربة المشترك (٧ أيام لكل جهاز)</b><div id="sh"><small>...</small></div>
+<button onclick="shNew()">كود تجربة جديد (يلغي القديم)</button><button class="red" onclick="shOff()">إيقاف كود التجربة</button></div>
 <div class="card"><b>كود جديد</b>
 <input id="nm" placeholder="اسم العميل"><input id="ph" placeholder="رقم الموبايل (اختياري)" inputmode="tel">
 <select id="kind" onchange="document.getElementById('dd').style.display=this.value=='life'?'none':'block'"><option value="days">مدة بالأيام</option><option value="life">مدى الحياة</option></select>
@@ -18,8 +20,13 @@ const U="https://ilgrodwikjbyuvbzpmcq.supabase.co/rest/v1/rpc/",K="eyJhbGciOiJIU
 async function rpc(f,b){const r=await fetch(U+f,{method:"POST",headers:{apikey:K,Authorization:"Bearer "+K,"Content-Type":"application/json"},body:JSON.stringify(b)});return r.json()}
 function esc(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 async function enter(){PW=document.getElementById("pw").value;const r=await rpc("act_admin_list",{p_pw:PW});if(!r.ok){document.getElementById("lerr").textContent="كلمة السر غلط أو محاولات كتير";return}
-document.getElementById("login").style.display="none";document.getElementById("app").style.display="block";draw(r.rows)}
-async function load(){const r=await rpc("act_admin_list",{p_pw:PW});if(r.ok)draw(r.rows)}
+document.getElementById("login").style.display="none";document.getElementById("app").style.display="block";draw(r.rows);shLoad()}
+async function shLoad(){const r=await rpc("act_admin_shared_status",{p_pw:PW});const e=document.getElementById("sh");if(!r.ok){e.textContent="خطأ";return}
+if(!r.exists){e.innerHTML="<small>لسه مفيش كود تجربة</small>";return}
+e.innerHTML='<div class="code">'+esc(r.code)+'</div><small>'+(r.enabled?"شغّال":"موقوف")+' · أجهزة استخدمته: '+r.devices+' · فعّالة دلوقتي: '+r.active_now+'</small>'}
+async function shNew(){if(!confirm("هيطلع كود تجربة جديد ويوقف القديم للأجهزة الجديدة (الأجهزة اللي أخدت تجربتها بتكمل). تكمل؟"))return;await rpc("act_admin_shared_new",{p_pw:PW});shLoad()}
+async function shOff(){if(!confirm("توقف كود التجربة؟ الأجهزة الجديدة مش هتقدر تستخدمه."))return;await rpc("act_admin_shared_disable",{p_pw:PW});shLoad()}
+async function load(){shLoad();const r=await rpc("act_admin_list",{p_pw:PW});if(r.ok)draw(r.rows);shLoad()}
 function fd(d){return d?new Date(d).toLocaleDateString("ar-EG"):"-"}
 function draw(rows){document.getElementById("list").innerHTML=rows.map(x=>'<div class="card"><b>'+esc(x.name)+'</b> <small>'+esc(x.phone||"")+'</small><br><small>'+(x.lifetime?"مدى الحياة":x.days+" يوم")+' · '+({issued:"لم يُفعَّل",active:"مفعّل",revoked:"ملغي"}[x.status]||x.status)+'</small><br><small>تفعيل: '+fd(x.activated_at)+' · ينتهي: '+(x.lifetime?"أبدًا":fd(x.expires_at))+' · آخر تحقق: '+fd(x.last_check_at)+'</small>'+(x.status!="revoked"?'<button class="gray" onclick="rp(\''+x.id+'\')">كود بديل (ضاع الكود)</button>':'')+(x.status=="active"?'<button class="gray" onclick="rs(\''+x.id+'\')">تغيير الموبايل (فك الربط)</button>':'')+(x.status!="revoked"?'<button class="red" onclick="rv(\''+x.id+'\')">إلغاء الكود</button>':'')+'</div>').join("")||"<small>مفيش أكواد لسه</small>"}
 async function mk(){const life=document.getElementById("kind").value=="life";const r=await rpc("act_admin_create",{p_pw:PW,p_name:document.getElementById("nm").value,p_phone:document.getElementById("ph").value,p_days:life?null:parseInt(document.getElementById("dd").value),p_lifetime:life});const o=document.getElementById("out");
